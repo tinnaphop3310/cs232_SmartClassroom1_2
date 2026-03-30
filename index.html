@@ -49,6 +49,16 @@ function upload() {
 
     reader.readAsDataURL(file);
 }
+function getColor(deadline) {
+    const now = new Date();
+    const dl = new Date(deadline);
+
+    const diff = (dl - now) / (1000 * 60 * 60);
+
+    if (diff < 0) return "red";
+    if (diff < 24) return "yellow";
+    return "";
+}
 
 </script>
 
