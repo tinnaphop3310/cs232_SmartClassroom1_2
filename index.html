@@ -1,65 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-    .green { background: #c8f7c5; }
-    .yellow { background: #fff3cd; }
-    .red { background: #f8d7da; }
-    </style>
+    <title>Smart Classroom</title>
 </head>
-    
 <body>
 
-<h2>Upload Assignment</h2>
+<h2>🎓 Smart Classroom System</h2>
 
-<input type="text" id="title" placeholder="Title"><br><br>
-<input type="datetime-local" id="deadline"><br><br>
-<input type="file" id="file"><br><br>
-
-<button onclick="upload()">Upload</button>
-
-<h2>Assignments</h2>
-<div id="list"></div>
+<button onclick="goTeacher()">🧑‍🏫 Teacher</button>
+<button onclick="goStudent()">🎓 Student</button>
 
 <script>
-
-const API_URL = "PUT_YOUR_API_URL_HERE";
-
-function upload() {
-    const file = document.getElementById("file").files[0];
-    const reader = new FileReader();
-
-    reader.onload = function() {
-        const base64 = reader.result.split(',')[1];
-
-        fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({
-                assignment_id: Date.now().toString(),
-                title: document.getElementById("title").value,
-                deadline: document.getElementById("deadline").value,
-                fileName: file.name,
-                file: base64
-            })
-        }).then(res => res.json())
-          .then(data => {
-              alert("Uploaded!");
-          });
-    };
-
-    reader.readAsDataURL(file);
+function goTeacher() {
+    window.location.href = "teacher.html";
 }
-function getColor(deadline) {
-    const now = new Date();
-    const dl = new Date(deadline);
-
-    const diff = (dl - now) / (1000 * 60 * 60);
-
-    if (diff < 0) return "red";
-    if (diff < 24) return "yellow";
-    return "";
+function goStudent() {
+    window.location.href = "student.html";
 }
-
 </script>
 
 </body>

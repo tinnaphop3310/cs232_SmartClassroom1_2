@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { font-family: Arial; }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sub-box {
+            margin-top: 10px;
+            padding: 10px;
+            border-top: 1px dashed #aaa;
+        }
+
+        .btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>🧑‍🏫 Teacher Dashboard</h2>
+
+<h3>Create Assignment</h3>
+
+<input id="title" placeholder="Title"><br><br>
+<textarea id="description" placeholder="Description"></textarea><br><br>
+
+<label>📅 Deadline:</label><br>
+<input type="datetime-local" id="deadline"><br><br>
+
+<label>
+<input type="checkbox" id="allowLate"> Allow Late
+</label><br><br>
+
+<label>👥 Class Size:</label><br>
+<input type="number" id="classSize"><br><br>
+
+<button onclick="createAssignment()">Create</button>
+
+<hr>
+
+<div id="list"></div>
+
+<script>
+function createAssignment() {
+    let assignments = JSON.parse(localStorage.getItem("assignments")) || [];
+
+    assignments.push({
+        id: Date.now(),
+        title: title.value,
+        description: description.value,
+        deadline: deadline.value,
+        allowLate: allowLate.checked,
+        classSize: parseInt(classSize.value)
+    });
+
+    localStorage.setItem("assignments", JSON.stringify(assignments));
+    showAssignments();
+}
+
+function showAssignments() {
+    const container = document.getElementById("list");
+    container.innerHTML = "";
+
+    let assignments = JSON.parse(localStorage.getItem("assignments")) || [];
+    let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+
+    assignments.forEach(a => {
+        const deadline = new Date(a.deadline);
+
+        let onTime = 0;
+        let late = 0;
+
+        submissions.forEach(s => {
+            if (s.assignment_id == a.id) {
+                if (new Date(s.time) <= deadline) onTime++;
+                else late++;
+            }
+        });
+
+        let notSubmitted = a.classSize - (onTime + late);
+
+        const chartId = "chart-" + a.id;
+        const barId = "bar-" + a.id;
+        const subId = "sub-" + a.id;
+
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <h3>${a.title}</h3>
+            <p>${a.description}</p>
+
+            <p>📊 On Time: ${onTime} | Late: ${late} | Not Submitted: ${notSubmitted}</p>
+
+            <canvas id="${chartId}"></canvas>
+            <canvas id="${barId}"></canvas>
+
+            <br>
+            <button onclick="toggleSub('${subId}')">
+                📂 View / Hide Submissions
+            </button>
+
+            <div id="${subId}" class="sub-box hidden"></div>
+        `;
+
+        container.appendChild(div);
+
+        // PIE CHART
+        new Chart(document.getElementById(chartId), {
+            type: 'pie',
+            data: {
+                labels: ['On Time', 'Late', 'Not Submitted'],
+                datasets: [{
+                    data: [onTime, late, notSubmitted],
+                    backgroundColor: ['green', 'orange', 'gray']
+                }]
+            }
+        });
+
+        // BAR CHART
+        new Chart(document.getElementById(barId), {
+            type: 'bar',
+            data: {
+                labels: ['On Time', 'Late', 'Not Submitted'],
+                datasets: [{
+                    label: 'Students',
+                    data: [onTime, late, notSubmitted]
+                }]
+            }
+        });
+
+        renderSubmissions(a.id, subId);
+    });
+}
+
+function toggleSub(id) {
+    const box = document.getElementById(id);
+    box.classList.toggle("hidden");
+}
+
+function renderSubmissions(assignmentId, containerId) {
+    let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+    let assignments = JSON.parse(localStorage.getItem("assignments")) || [];
+
+    const assignment = assignments.find(a => a.id == assignmentId);
+    const deadline = new Date(assignment.deadline);
+
+    const container = document.getElementById(containerId);
+    const filtered = submissions.filter(s => s.assignment_id == assignmentId);
+
+    if (filtered.length === 0) {
+        container.innerHTML = "<p>❌ ยังไม่มีคนส่ง</p>";
+        return;
+    }
+
+    container.innerHTML = "";
+
+    filtered.forEach((s, i) => {
+        const isLate = new Date(s.time) > deadline;
+
+        const div = document.createElement("div");
+
+        div.innerHTML = `
+            <p>👤 Student ${i+1}</p>
+            <p>📎 ${s.file}</p>
+            <p>🕒 ${new Date(s.time).toLocaleString()}</p>
+            <p style="color:${isLate ? 'orange' : 'green'}">
+                ${isLate ? 'Late' : 'On Time'}
+            </p>
+
+            <button onclick="downloadFile('${s.file}')">
+                ⬇️ Download
+            </button>
+
+            <hr>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+// 🔥 DOWNLOAD (mock)
+function downloadFile(filename) {
+    const content = `This is mock file: ${filename}`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+
+    a.click();
+}
+
+showAssignments();
+</script>
+
+</body>
+</html>
