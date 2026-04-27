@@ -1,23 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-    <title>Smart Classroom</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassSync - Student Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- ลบลิงก์ที่เสียออก และใช้ SVG แทนเพื่อความแน่นอน -->
 </head>
 <body>
 
-<h2>🎓 Smart Classroom System</h2>
+<div class="mobile-container">
+    
+    <!-- หน้า 1: HOME -->
+    <div id="view-home" class="view active">
+        <header class="home-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span class="logo" style="font-weight: bold; font-size: 20px;">ClassSync</span>
+            <!-- ปุ่มบวกมุมขวาบน -->
+            <div class="add-icon-wrapper" onclick="showView('view-add')" style="cursor:pointer; background: #eee; padding: 8px; border-radius: 10px; display: flex;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </div>
+        </header>
 
-<button onclick="goTeacher()">Teacher</button>
-<button onclick="goStudent()">Student</button>
+        <!-- Search Bar -->
+        <div class="search-container" style="display: flex; align-items: center; background: #f1f1f1; padding: 10px; border-radius: 15px; margin-bottom: 20px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" placeholder="ค้นหาวิชาหรือชื่องาน..." onkeyup="render()" style="border: none; background: none; outline: none; width: 100%;">
+        </div>
 
-<script>
-function goTeacher() {
-    window.location.href = "teacher.html";
-}
-function goStudent() {
-    window.location.href = "student.html";
-}
-</script>
+        <div class="section-title">Quick deadline</div>
+        <div id="quick-card" class="timer-card">
+            <div id="home-timer" class="timer-big">00:00:00</div>
+            <div id="home-quick-title" class="quick-task-name">ไม่มีงานค้าง</div>
+            <span id="home-quick-tag" class="tag" style="display:none;">Subject</span>
+        </div>
 
+        <div class="header-row">
+            <div class="section-title">Check list</div>
+            <button id="btn-more-check" class="btn-more" onclick="showView('view-all-check')">more</button>
+        </div>
+        <div id="home-check-list" class="list-container"></div>
+
+        <div class="section-title">Calendar (April 2026)</div>
+        <div class="calendar-card">
+            <div class="cal-grid" id="home-calendar"></div>
+        </div>
+
+        <div class="header-row">
+            <div class="section-title">Done list</div>
+            <button id="btn-more-done" class="btn-more" onclick="showView('view-all-done')">more</button>
+        </div>
+        <div id="home-done-list" class="list-container"></div>
+    </div>
+
+    <!-- แทนที่ส่วนหน้า 2: ADD NEW DEADLINE เดิมด้วยโค้ดนี้ -->
+<div id="view-add" class="view">
+    <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+        <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </div>
+        <span style="font-weight: bold; font-size: 18px;">เพิ่มเดดไลน์ใหม่</span>
+    </div>
+    <div class="form-group">
+        <label>หัวข้อการบ้าน</label>
+        <input type="text" id="in-title" placeholder="เช่น รายงานวิชา Cloud">
+        
+        <label>รหัสวิชา (Tag)</label>
+        <input type="text" id="in-tag" placeholder="เช่น CS262">
+        <div id="suggested-tags" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+            <!-- รายชื่อวิชาที่เคยใช้จะเด้งขึ้นที่นี่ -->
+        </div>
+
+        <label style="margin-top: 15px; display: block;">เลือกสี Tag</label>
+        <div id="color-picker" style="display: flex; gap: 10px; margin-top: 10px;">
+            <div class="color-opt active" data-color="#6db08c" style="background:#6db08c; width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; outline:2px solid #6db08c;"></div>
+            <div class="color-opt" data-color="#ff4d4d" style="background:#ff4d4d; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+            <div class="color-opt" data-color="#4d94ff" style="background:#4d94ff; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+            <div class="color-opt" data-color="#ff944d" style="background:#ff944d; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+            <div class="color-opt" data-color="#b84dff" style="background:#b84dff; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+        </div>
+
+        <label style="margin-top: 15px; display: block;">วันเวลาที่ต้องส่ง</label>
+        <input type="datetime-local" id="in-date">
+        
+        <button class="btn-main" onclick="addTask()" style="margin-top:30px;">บันทึกข้อมูล</button>
+    </div>
+</div>
+
+
+    <!-- หน้าอื่นๆ (แก้ไขปุ่มย้อนกลับให้เป็น SVG เหมือนกัน) -->
+    <div id="view-all-check" class="view">
+        <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+            <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+            <span style="font-weight: bold; font-size: 18px;">Checklist ทั้งหมด</span>
+        </div>
+        <div id="full-check-list" class="list-container"></div>
+    </div>
+
+    <div id="view-all-done" class="view">
+        <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+            <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+            <span style="font-weight: bold; font-size: 18px;">งานที่ส่งแล้ว</span>
+        </div>
+        <div id="full-done-list" class="list-container"></div>
+    </div>
+
+    <div id="view-detail" class="view">
+        <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+            <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+            <span style="font-weight: bold; font-size: 18px;">รายละเอียดงาน</span>
+        </div>
+        <div id="detail-content" class="detail-card"></div>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

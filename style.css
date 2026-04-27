@@ -1,0 +1,173 @@
+:root {
+    --primary: #ff4d4d;
+    --green: #6db08c;
+    --bg: #f8f9fa;
+    --gray-light: #e9ecef;
+    --text: #333;
+}
+
+body {
+    background-color: #ddd;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.mobile-container {
+    width: 100%;
+    max-width: 393px;
+    background: white;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.3s ease; }
+
+header { display: flex; justify-content: space-between; align-items: center; }
+.logo { font-weight: 800; font-size: 22px; color: var(--text); }
+.add-icon { font-size: 24px; cursor: pointer; }
+
+.section-title { font-size: 14px; font-weight: bold; color: #888; margin: 20px 0 10px; text-transform: uppercase; }
+
+/* Quick Deadline */
+.timer-card {
+    background: #f0f0f0;
+    border-radius: 25px;
+    padding: 30px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.timer-big { font-size: 55px; font-weight: 900; color: var(--primary); font-family: monospace; }
+.quick-task-name { font-weight: bold; margin: 10px 0; font-size: 18px; }
+
+/* List Items */
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.btn-more { background: none; border: 1px solid #ccc; border-radius: 10px; font-size: 11px; cursor: pointer; padding: 2px 10px; }
+
+.task-card {
+    background: var(--gray-light);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+.tag { background: var(--green); color: white; padding: 2px 10px; border-radius: 10px; font-size: 10px; }
+
+/* Calendar */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; font-size: 12px; }
+.day-point { color: var(--primary); font-weight: bold; position: relative; }
+.day-point::after { content: '•'; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); }
+
+/* Form */
+.top-bar { display: flex; align-items: center; gap: 20px; font-weight: bold; margin-bottom: 30px; font-size: 18px; }
+.form-group label { display: block; margin-top: 15px; font-size: 14px; font-weight: bold; }
+input { width: 100%; padding: 15px; margin-top: 5px; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; }
+.btn-main { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: bold; margin-top: 30px; cursor: pointer; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* เพิ่มส่วนนี้เข้าไปในไฟล์ style.css เดิม */
+.search-container {
+    background: #f1f1f1;
+    border-radius: 15px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+}
+.search-container input {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0 0 0 10px;
+    outline: none;
+    width: 100%;
+}
+.add-icon {
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text);
+    padding: 5px;
+}
+.add-icon:hover { color: var(--primary); }
+/* สไตล์อื่นๆ คงเดิมตามที่เคยส่งให้ */
+/* จัดการส่วนหัวข้อและปุ่มบวก */
+.home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.add-icon-wrapper {
+    width: 35px;
+    height: 35px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.add-icon-wrapper:hover {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.add-icon-wrapper i {
+    font-size: 18px;
+}
+
+/* เพิ่มระบบสีเมื่อ Expired */
+.task-card.expired {
+    border-left: 5px solid #ff4d4d;
+    background-color: #fff5f5;
+}
+
+.task-card.expired .time-text {
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+/* สไตล์อื่นๆ ที่จำเป็น */
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 14px;
+}
+svg {
+    vertical-align: middle;
+    transition: transform 0.2s;
+}
+
+svg:hover {
+    transform: scale(1.1);
+    color: #ff4d4d; /* เปลี่ยนสีเมื่อเอาเมาส์ไปชี้ */
+}
+
+.add-icon-wrapper {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
