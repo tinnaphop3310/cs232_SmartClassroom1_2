@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClassSync - Student Portal</title>
     <link rel="stylesheet" href="style.css">
-    <!-- ลบลิงก์ที่เสียออก และใช้ SVG แทนเพื่อความแน่นอน -->
 </head>
 <body>
 
@@ -58,7 +57,7 @@
         <div id="home-done-list" class="list-container"></div>
     </div>
 
-    <!-- แทนที่ส่วนหน้า 2: ADD NEW DEADLINE เดิมด้วยโค้ดนี้ -->
+    <!-- 2: ADD NEW DEADLINE -->
 <div id="view-add" class="view">
     <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
         <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">
@@ -76,7 +75,7 @@
         <label>รหัสวิชา (Tag)</label>
         <input type="text" id="in-tag" placeholder="เช่น CS262">
         <div id="suggested-tags" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
-            <!-- รายชื่อวิชาที่เคยใช้จะเด้งขึ้นที่นี่ -->
+        
         </div>
 
         <label style="margin-top: 15px; display: block;">เลือกสี Tag</label>
@@ -96,7 +95,7 @@
 </div>
 
 
-    <!-- หน้าอื่นๆ (แก้ไขปุ่มย้อนกลับให้เป็น SVG เหมือนกัน) -->
+    <!-- หน้าอื่นๆ  -->
     <div id="view-all-check" class="view">
         <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
             <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">

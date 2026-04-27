@@ -97,8 +97,6 @@ input { width: 100%; padding: 15px; margin-top: 5px; border-radius: 12px; border
     padding: 5px;
 }
 .add-icon:hover { color: var(--primary); }
-/* สไตล์อื่นๆ คงเดิมตามที่เคยส่งให้ */
-/* จัดการส่วนหัวข้อและปุ่มบวก */
 .home-header {
     display: flex;
     justify-content: space-between;
