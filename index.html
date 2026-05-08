@@ -9,17 +9,67 @@
 <body>
 
 <div class="mobile-container">
-    
+    <div id="view-auth" class="view active">
+        <div class="auth-toolbar">
+            <div class="theme-switch" aria-label="Theme selector">
+                <button class="theme-option active" type="button" data-theme="light" onclick="setTheme('light')">White</button>
+                <button class="theme-option" type="button" data-theme="dark" onclick="setTheme('dark')">Dark</button>
+            </div>
+        </div>
+        <div class="auth-header">
+            <span class="logo">ClassSync</span>
+            <p>Sign in with your email to keep your deadlines in your own workspace.</p>
+        </div>
+
+        <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+            <button id="tab-login" class="auth-tab active" type="button" onclick="setAuthMode('login')">Login</button>
+            <button id="tab-register" class="auth-tab" type="button" onclick="setAuthMode('register')">Register</button>
+        </div>
+
+        <form class="auth-form" onsubmit="handleAuthSubmit(event)">
+            <label for="auth-email">Email</label>
+            <input type="email" id="auth-email" autocomplete="email" placeholder="you@example.com" required>
+
+            <label for="auth-password">Password</label>
+            <input type="password" id="auth-password" autocomplete="current-password" minlength="6" placeholder="At least 6 characters" required>
+
+            <label id="auth-name-label" for="auth-name" class="auth-name-field">Name</label>
+            <input type="text" id="auth-name" class="auth-name-field" autocomplete="name" placeholder="Your name">
+
+            <p id="auth-message" class="auth-message" aria-live="polite"></p>
+            <button id="auth-submit" class="btn-main" type="submit">Login</button>
+        </form>
+    </div>
+
     <!-- หน้า 1: HOME -->
-    <div id="view-home" class="view active">
+    <div id="view-home" class="view">
         <header class="home-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <span class="logo" style="font-weight: bold; font-size: 20px;">ClassSync</span>
             <!-- ปุ่มบวกมุมขวาบน -->
-            <div class="add-icon-wrapper" onclick="showView('view-add')" style="cursor:pointer; background: #eee; padding: 8px; border-radius: 10px; display: flex;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
+            <div class="header-actions">
+                <div class="theme-switch" aria-label="Theme selector">
+                    <button class="theme-option active" type="button" data-theme="light" onclick="setTheme('light')">White</button>
+                    <button class="theme-option" type="button" data-theme="dark" onclick="setTheme('dark')">Dark</button>
+                </div>
+                <button class="icon-btn" type="button" onclick="showView('view-add')" aria-label="Add deadline" title="Add deadline">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="icon-btn" type="button" onclick="requestDeadlineNotifications()" aria-label="Enable deadline notifications" title="Enable deadline notifications">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                </button>
+                <button class="icon-btn" type="button" onclick="logout()" aria-label="Logout" title="Logout">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
             </div>
         </header>
 
@@ -32,29 +82,83 @@
             <input type="text" id="searchInput" placeholder="ค้นหาวิชาหรือชื่องาน..." onkeyup="render()" style="border: none; background: none; outline: none; width: 100%;">
         </div>
 
-        <div class="section-title">Quick deadline</div>
-        <div id="quick-card" class="timer-card">
-            <div id="home-timer" class="timer-big">00:00:00</div>
-            <div id="home-quick-title" class="quick-task-name">ไม่มีงานค้าง</div>
-            <span id="home-quick-tag" class="tag" style="display:none;">Subject</span>
-        </div>
+        <main class="home-grid">
+            <section class="dashboard-panel quick-panel">
+                <div class="section-title">Quick deadline</div>
+                <div id="quick-card" class="timer-card">
+                    <div id="home-timer" class="timer-big">00:00:00</div>
+                    <div id="home-quick-title" class="quick-task-name">ไม่มีงานค้าง</div>
+                    <span id="home-quick-tag" class="tag" style="display:none;">Subject</span>
+                </div>
+            </section>
 
-        <div class="header-row">
-            <div class="section-title">Check list</div>
-            <button id="btn-more-check" class="btn-more" onclick="showView('view-all-check')">more</button>
-        </div>
-        <div id="home-check-list" class="list-container"></div>
+            <section class="dashboard-panel progress-panel">
+                <div class="section-title">Homework progress</div>
+                <div class="progress-card">
+                    <div id="progress-ring" class="progress-ring" style="--progress:0%;">
+                        <div class="progress-ring-inner">
+                            <div id="progress-percent" class="progress-percent">0%</div>
+                            <div class="progress-label">Done</div>
+                        </div>
+                    </div>
+                    <div class="progress-stats">
+                        <div>
+                            <span class="stat-dot done-dot"></span>
+                            <span id="progress-done-count">0 done</span>
+                        </div>
+                        <div>
+                            <span class="stat-dot pending-dot"></span>
+                            <span id="progress-pending-count">0 undone</span>
+                        </div>
+                        <div id="progress-total-count" class="progress-total">0 homework total</div>
+                        <div id="progress-tag-legend" class="progress-tag-legend"></div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="section-title">Calendar (April 2026)</div>
-        <div class="calendar-card">
-            <div class="cal-grid" id="home-calendar"></div>
-        </div>
+            <section class="dashboard-panel alert-panel">
+                <div class="header-row">
+                    <div class="section-title">Deadline alerts</div>
+                    <button class="btn-more" type="button" onclick="requestDeadlineNotifications()">notify</button>
+                </div>
+                <div id="deadline-alert-list" class="alert-list"></div>
+            </section>
 
-        <div class="header-row">
-            <div class="section-title">Done list</div>
-            <button id="btn-more-done" class="btn-more" onclick="showView('view-all-done')">more</button>
-        </div>
-        <div id="home-done-list" class="list-container"></div>
+            <section class="dashboard-panel checklist-panel">
+                <div class="header-row">
+                    <div class="section-title">Check list</div>
+                    <button id="btn-more-check" class="btn-more" onclick="showView('view-all-check')">more</button>
+                </div>
+                <div id="home-check-list" class="list-container"></div>
+            </section>
+
+            <section class="dashboard-panel calendar-panel">
+                <div class="calendar-header">
+                    <button class="calendar-nav" type="button" onclick="changeCalendarMonth(-1)" aria-label="Previous month" title="Previous month">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div id="calendar-title" class="section-title">Calendar</div>
+                    <button class="calendar-nav" type="button" onclick="changeCalendarMonth(1)" aria-label="Next month" title="Next month">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="calendar-card">
+                    <div class="cal-grid" id="home-calendar"></div>
+                </div>
+            </section>
+
+            <section class="dashboard-panel done-panel">
+                <div class="header-row">
+                    <div class="section-title">Done list</div>
+                    <button id="btn-more-done" class="btn-more" onclick="showView('view-all-done')">more</button>
+                </div>
+                <div id="home-done-list" class="list-container"></div>
+            </section>
+        </main>
     </div>
 
     <!-- 2: ADD NEW DEADLINE -->
@@ -73,18 +177,21 @@
         <input type="text" id="in-title" placeholder="เช่น รายงานวิชา Cloud">
         
         <label>รหัสวิชา (Tag)</label>
-        <input type="text" id="in-tag" placeholder="เช่น CS262">
-        <div id="suggested-tags" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+        <input type="text" id="in-tag" placeholder="เช่น CS262" oninput="syncColorForTypedTag()">
+        <div id="suggested-tags" class="suggested-tags">
         
         </div>
 
         <label style="margin-top: 15px; display: block;">เลือกสี Tag</label>
-        <div id="color-picker" style="display: flex; gap: 10px; margin-top: 10px;">
-            <div class="color-opt active" data-color="#6db08c" style="background:#6db08c; width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; outline:2px solid #6db08c;"></div>
-            <div class="color-opt" data-color="#ff4d4d" style="background:#ff4d4d; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-            <div class="color-opt" data-color="#4d94ff" style="background:#4d94ff; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-            <div class="color-opt" data-color="#ff944d" style="background:#ff944d; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-            <div class="color-opt" data-color="#b84dff" style="background:#b84dff; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+        <div id="color-picker" class="color-picker">
+            <button class="color-opt active" type="button" data-color="#6db08c" style="background:#6db08c;" aria-label="Green tag color"></button>
+            <button class="color-opt" type="button" data-color="#ff4d4d" style="background:#ff4d4d;" aria-label="Red tag color"></button>
+            <button class="color-opt" type="button" data-color="#4d94ff" style="background:#4d94ff;" aria-label="Blue tag color"></button>
+            <button class="color-opt" type="button" data-color="#ff944d" style="background:#ff944d;" aria-label="Orange tag color"></button>
+            <button class="color-opt" type="button" data-color="#b84dff" style="background:#b84dff;" aria-label="Purple tag color"></button>
+            <button class="color-opt" type="button" data-color="#2f855a" style="background:#2f855a;" aria-label="Deep green tag color"></button>
+            <label class="custom-color-label" for="custom-color">Custom</label>
+            <input type="color" id="custom-color" class="custom-color-input" value="#6db08c" onchange="selectColor(this.value)">
         </div>
 
         <label style="margin-top: 15px; display: block;">วันเวลาที่ต้องส่ง</label>
@@ -122,6 +229,19 @@
         <div id="full-done-list" class="list-container"></div>
     </div>
 
+    <div id="view-day" class="view">
+        <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+            <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+            <span id="day-title" style="font-weight: bold; font-size: 18px;">Deadlines</span>
+        </div>
+        <div id="day-deadline-list" class="list-container"></div>
+    </div>
+
     <div id="view-detail" class="view">
         <div class="top-bar" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
             <div onclick="showView('view-home')" style="cursor:pointer; display: flex; align-items: center; padding: 5px;">
@@ -136,6 +256,8 @@
     </div>
 
 </div>
+
+<div id="app-notification-stack" class="app-notification-stack" aria-live="polite"></div>
 
 <script src="script.js"></script>
 </body>
