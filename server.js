@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-before-deploying';
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
@@ -158,6 +159,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`ClassSync running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`ClassSync running on http://${HOST}:${PORT}`);
 });
