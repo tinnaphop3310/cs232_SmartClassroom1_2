@@ -68,6 +68,41 @@ function getTaskColor(task, fallback = '#6db08c') {
     return task.color || getRememberedTagColors()[getTaskTag(task)] || fallback;
 }
 
+function escapeHTML(value) {
+    return String(value || '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
+
+function normalizeSubmissionUrl(value) {
+    const rawUrl = String(value || '').trim();
+    if (!rawUrl) return '';
+
+    const urlWithProtocol = /^[a-z][a-z\d+\-.]*:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+    try {
+        const url = new URL(urlWithProtocol);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+        return url.href;
+    } catch (error) {
+        return null;
+    }
+}
+
+function getSubmissionLinkHTML(task) {
+    const url = normalizeSubmissionUrl(task?.submissionUrl);
+    if (!url) return '';
+
+    return `
+        <a class="submission-link" href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">
+            Open submission website
+        </a>
+    `;
+}
+
 function setTheme(theme) {
     const nextTheme = theme === 'dark' ? 'dark' : 'light';
     document.body.classList.toggle('dark-theme', nextTheme === 'dark');
@@ -1061,10 +1096,17 @@ function addTask() {
         saveDeadlinePickerValue();
     }
     const date = document.getElementById('in-date').value;
+    const submissionUrlInput = document.getElementById('in-submission-url');
+    const submissionUrl = normalizeSubmissionUrl(submissionUrlInput?.value);
     const groupFriends = getSelectedGroupFriends();
     const wantsGroupWork = document.getElementById('in-group-enabled')?.checked;
 
     if (title && rawTag && date) {
+        if (submissionUrl === null) {
+            alert('Please enter a valid submission website link.');
+            return;
+        }
+
         if (wantsGroupWork && groupFriends.length === 0) {
             alert('Select at least one friend for group work.');
             return;
@@ -1078,6 +1120,7 @@ function addTask() {
             tag: tag,
             color: selectedColor,
             deadline: date,
+            submissionUrl,
             status: 'pending',
             proofImg: null,
             isGroup: groupFriends.length > 0,
@@ -1093,6 +1136,7 @@ function addTask() {
         document.getElementById('in-title').value = '';
         document.getElementById('in-tag').value = '';
         document.getElementById('in-date').value = '';
+        if (submissionUrlInput) submissionUrlInput.value = '';
         updateDeadlinePreview();
         const groupEnabled = document.getElementById('in-group-enabled');
         if (groupEnabled) groupEnabled.checked = false;
@@ -1157,6 +1201,7 @@ function showDetail(id) {
 
     const canSubmit = isGroupLeader(task);
     const leaderName = getUserDisplayName(getGroupLeaderEmail(task));
+    const submissionLink = getSubmissionLinkHTML(task);
     const groupInfo = task.isGroup ? `
         <p class="group-detail-line">Group work with ${task.participants.map(email => getUserDisplayName(email)).join(', ')}</p>
         <p class="group-role-line">${getGroupRoleLabel(task)}</p>
@@ -1168,6 +1213,7 @@ function showDetail(id) {
             <span class="tag" style="background:${getTaskColor(task)}; color:white; padding:4px 12px; border-radius:10px;">${getTaskTag(task)}</span>
             ${groupInfo}
             <p style="margin-top:20px;">Deadline: ${task.deadline.replace('T', ' ')}</p>
+            ${submissionLink}
 
             ${canSubmit ? `
                 <div class="proof-upload-box">
@@ -1197,6 +1243,7 @@ function showDetail(id) {
             <p>Subject: ${getTaskTag(task)}</p>
             ${groupInfo}
             <p>Submitted: ${task.submittedAt}</p>
+            ${submissionLink}
             <div style="margin-top:20px;">
                 <strong>Submission proof:</strong><br>
                 ${task.proofImg ? `<img src="${task.proofImg}" style="width:100%; border-radius:15px; margin-top:10px; border:1px solid #eee;">` : '<p style="color:#999;">No image attached</p>'}

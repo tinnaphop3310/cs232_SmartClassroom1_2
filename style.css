@@ -1490,6 +1490,13 @@ body.dark-theme .task-group-header {
 .form-group label { display: block; margin-top: 15px; font-size: 14px; font-weight: bold; }
 input { width: 100%; padding: 15px; margin-top: 5px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); box-sizing: border-box; }
 input::placeholder { color: var(--muted); }
+.field-help {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
 .btn-main { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: bold; margin-top: 30px; cursor: pointer; }
 
 .btn-main {
@@ -1579,6 +1586,27 @@ input::placeholder { color: var(--muted); }
 
 .deadline-preview.late {
     color: var(--danger);
+}
+
+.submission-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px 16px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line));
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 950;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.submission-link:hover {
+    background: color-mix(in srgb, var(--primary) 18%, var(--surface));
 }
 
 .deadline-picker {
