@@ -1,8 +1,6 @@
 ClassSync
 =========
 
-ClassSync is now ready to run as a small full-stack web app without Amazon Cognito.
-
 Architecture:
 
 - Frontend: `index.html`, `style.css`, `script.js`
