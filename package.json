@@ -1,0 +1,16 @@
+{
+  "name": "classsync",
+  "version": "1.0.0",
+  "description": "ClassSync student portal with a Node.js backend for AWS Learner Lab deployment.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

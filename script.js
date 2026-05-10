@@ -1,8 +1,10 @@
 // 1. ข้อมูลเริ่มต้น
 const USERS_KEY = 'classsync-users';
 const SESSION_KEY = 'classsync-current-user';
+const SESSION_TOKEN_KEY = 'classsync-auth-token';
 const THEME_KEY = 'classsync-theme';
 const NOTIFIED_KEY = 'classsync-deadline-notified';
+const API_BASE_URL = '';
 const ALERT_WINDOW_DAYS = 7;
 const DEADLINE_NOTIFY_WINDOW_HOURS = 10;
 const DEADLINE_NOTIFY_INTERVAL_MS = 60 * 60 * 1000;
@@ -17,15 +19,53 @@ let deadlinePickerDate = new Date();
 let selectedInsightTag = null;
 let selectedInsightFilter = 'all';
 let detailReturnView = 'view-home';
+let authToken = localStorage.getItem(SESSION_TOKEN_KEY) || '';
+let usersCache = {};
 
 let selectedColor = "#6db08c";
 
 function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+    return usersCache;
 }
 
 function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    usersCache = users || {};
+    if (!authToken) return;
+
+    apiRequest('/api/users/state', {
+        method: 'PUT',
+        body: JSON.stringify({ users: usersCache })
+    }).then(data => {
+        usersCache = data.users || usersCache;
+        if (currentUserEmail && usersCache[currentUserEmail]) {
+            tasks = usersCache[currentUserEmail].tasks || tasks;
+        }
+    }).catch(error => {
+        console.error('Could not save data to the server:', error);
+    });
+}
+
+async function apiRequest(path, options = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+    };
+
+    if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Server request failed.');
+    }
+
+    return data;
 }
 
 function ensureUserSocialData(user) {
@@ -393,13 +433,12 @@ function setAuthMode(mode) {
     showAuthMessage('');
 }
 
-function handleAuthSubmit(event) {
+async function handleAuthSubmit(event) {
     event.preventDefault();
 
     const email = normalizeEmail(document.getElementById('auth-email').value);
     const password = document.getElementById('auth-password').value;
     const name = document.getElementById('auth-name').value.trim();
-    const users = getUsers();
 
     if (!email || !password) {
         showAuthMessage('Please enter your email and password.');
@@ -411,43 +450,36 @@ function handleAuthSubmit(event) {
         return;
     }
 
-    if (authMode === 'register') {
-        if (users[email]) {
-            showAuthMessage('This email already has an account. Please login instead.');
-            return;
-        }
+    const submitButton = document.getElementById('auth-submit');
+    const originalText = submitButton.innerText;
+    submitButton.disabled = true;
+    submitButton.innerText = authMode === 'register' ? 'Creating...' : 'Logging in...';
 
-        users[email] = {
-            email,
-            name: name || email.split('@')[0],
-            password,
-            tasks: getDefaultTasks(),
-            tagColors: {},
-            friends: [],
-            friendRequests: [],
-            sentFriendRequests: [],
-            groupInvites: []
-        };
-        saveUsers(users);
-        startSession(email, users[email].tasks);
-        return;
+    try {
+        const endpoint = authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
+        const data = await apiRequest(endpoint, {
+            method: 'POST',
+            body: JSON.stringify({ email, password, name })
+        });
+        startSession(data.email, data.users, data.token);
+    } catch (error) {
+        showAuthMessage(error.message || 'Could not connect to the login server.');
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerText = originalText;
     }
-
-    if (!users[email] || users[email].password !== password) {
-        showAuthMessage('Incorrect email or password.');
-        return;
-    }
-
-    startSession(email, users[email].tasks || []);
 }
 
-function startSession(email, userTasks) {
+function startSession(email, users, token) {
     currentUserEmail = email;
-    tasks = userTasks;
-    const users = getUsers();
+    if (token) {
+        authToken = token;
+        localStorage.setItem(SESSION_TOKEN_KEY, token);
+    }
+    usersCache = users || {};
     if (users[email]) {
         ensureUserSocialData(users[email]);
-        tasks = users[email].tasks || userTasks || [];
+        tasks = users[email].tasks || [];
     }
     if (users[email] && !users[email].tagColors) {
         users[email].tagColors = getRememberedTagColors();
@@ -473,23 +505,33 @@ function saveCurrentUserTasks() {
 function logout() {
     currentUserEmail = null;
     tasks = [];
+    authToken = '';
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_TOKEN_KEY);
     showAuthMessage('');
     setAuthMode('login');
     showView('view-auth');
 }
 
-function initAuth() {
+async function initAuth() {
     setAuthMode('login');
-    const sessionEmail = localStorage.getItem(SESSION_KEY);
-    const users = getUsers();
 
-    if (sessionEmail && users[sessionEmail]) {
-        currentUserEmail = sessionEmail;
-        tasks = users[sessionEmail].tasks || [];
-        showView('view-home');
-        requestDeadlineNotificationsOnStart();
-        showPendingGroupInviteNotifications();
+    if (authToken) {
+        try {
+            const data = await apiRequest('/api/auth/me');
+            startSession(data.email, data.users);
+            return;
+        } catch (error) {
+            authToken = '';
+            localStorage.removeItem(SESSION_TOKEN_KEY);
+            localStorage.removeItem(SESSION_KEY);
+            showAuthMessage('Please login again.');
+        }
+    }
+
+    const legacyUsers = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+    if (Object.keys(legacyUsers).length) {
+        showAuthMessage('Local-only accounts found. Please register again so your account is saved on the server.', 'success');
         return;
     }
 
